@@ -10,13 +10,13 @@
 
 ## usecase
 ビジネスロジックを記述。service層でビジネスロジックを切り分けた関数を登録しておき、それをusecaseでは呼び出すという流れ。
-### usecase.js
-ここに書いていく
+### usecaseXXX.js
+ここに書いていく。gasのエディタでファイルをソートしたい関係から命名規則が特殊
 
 
 ## service
 システムロジックを記述。repo層で細かい処理をwrapした関数を登録しておき、それを serviceでは呼び出すという流れ。
-### service.js
+### serviceXXX.js
 ここに書いていく
 
 ## repository
