@@ -1,13 +1,4 @@
-function extractStanbyTasks(hash, scheduleBuf) {
-  const stanbyTasks = backlogHashFilter("stanby", true, hash);
 
-  // stanbyTasksの中でカレンダーに追加されていないものだけを返却
-  const tasksToAdd = stanbyTasks.filter(task => {
-    // タスクの名前がカレンダーの予定のタイトルに含まれていないかどうかをチェック
-    return !scheduleBuf.some(event => event.title.includes(task.name));
-  });
-  return tasksToAdd;
-}
 
 
 function getTodaySchedule() {
@@ -33,19 +24,6 @@ function getTodaySchedule() {
 
 
 
-
-function backlogHashFilter(attr, value, tasks) {
-  // 指定された属性が連想配列の要素のキーに含まれているかチェック
-  if (tasks.length > 0 && !(attr in tasks[0])) {
-    throw new Error("指定された属性は連想配列に存在しません: " + attr);
-  }
-
-  // フィルタリング処理
-  return tasks.filter(task => task[attr] === value);
-}
-
-
-
 function getBackLogTaskRangeBuf () {
   // ====== <start> mutable variables  ====
 
@@ -63,10 +41,12 @@ function getBackLogTaskRangeBuf () {
 
     if (cellValue === "A:added C" && startColumn === 1) {
       startColumn = r;
+      Logger.log("in getBackLogTaskRangeBuf");
       Logger.log("startColumn: " + startColumn);
     }
     if (cellValue === "end" && endColumn === 1) {
       endColumn = r;
+      Logger.log("in getBackLogTaskRangeBuf");
       Logger.log("endColumn: " + endColumn);
     }
   }
@@ -81,44 +61,17 @@ function getBackLogTaskRangeBuf () {
   }
 
   // getRange(開始行, 開始列, 行数, 列数)で範囲を取得
-  Logger.log("baclogArea==" + "開始行" + startColumn + ", 開始列" + 2 + "行数" + startColumn + "列数" + (completeColumn - 1));
-  const range = [startColumn + 1, 2, endColumn - startColumn, completeColumn - 1]
+  const range = [startColumn + 1, 2, endColumn - startColumn, completeColumn - 1];
+  Logger.log("in getBackLogTaskRangeBuf");
+  Logger.log("backlogArea==" + "開始行: " + range[0] + ", 開始列: " + range[1] + ", 行数: " + range[2] + ", 列数: " + range[3]);
   const buf = shD.getRange(range[0], range[1], range[2], range[3]).getValues();
+
   const hash = serializeBacklogBufToHash(buf)
   return {hash: hash,range: range}
 }
 
 
-function serializeBacklogBufToHash(buf) {
-  // 結果を格納するための配列
-  let tasks = [];
-  const s = 1; // ステータスの列インデックス
-  const t = 2; // 時間割の列のインデックス
-  const p = 3; // 優先度の列インデックス
-  const n = 4; // タスク名の列インデックス
-  const a = 8; // ASPの列インデックス
 
-  
-  // bufの各行をループして連想配列に変換
-  for (let i = 0; i < buf.length; i++) {
-    let row = buf[i];
-    let aspValue = row[a];
-    let task = {
-      "id": i+ 1, // backlogにおいて上から何個目のタスクなのか
-      "stanby": row[s] || false,
-      "timeBlock": row[t],
-      "priority": row[p],             // 優先度
-      "name": String(row[n]),                 // タスク名
-      "asp": aspValue || 0            // ASPが空なら0、そうでなければその値 
-    };
-    if (task.name !== "") {
-      tasks.push(task);
-    }
-  }
-
-  Logger.log(tasks);
-  return tasks;
-}
 
 
 // =========== start utils ==========
@@ -167,7 +120,6 @@ function addSpdToCalender() {
     const c = contents[i][0]; // 2次元配列から値を取り出す
     const title = c;
     const expectedMinutes = contents[i][5] || 60; // H列から見込み時間を取得（15の倍数でない場合は1時間とする）
-    Logger.log(expectedMinutes)
     
     // 重複を確認してから追加
     if (!checkDuplicate(existingEvents, title)) {

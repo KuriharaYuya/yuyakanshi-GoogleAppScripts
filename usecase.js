@@ -1,3 +1,7 @@
+// github.com
+// https://github.com/KuriharaYuya/yuyakanshi-GoogleAppScripts/tree/main
+
+
 function addStanbyTaskToCal () {
   // backlogとcalをload
   const contents = loadBacklogAndCal()
@@ -31,10 +35,13 @@ function removeUnStanbyTaskToCal () {
 }
 
 function inputCalenderResultsToSheet () {
-  // カレンダーから予定を取得する
-  // 命名規則から優先度を取得する
-  // nameや所要時間なども取得
-  // mtgの場合、
+  // backlogとcalをload
+  const contents = loadBacklogAndCal()
 
-  // memo: 優先度はプルダウンではなく、条件付き書式に変更する
+  const h = contents.task.hash
+  const sb = contents.scheduleBuf
+  const ir =  getScheduleInputRange()
+  
+  const t = extractTasksFromSchedule(sb)
+  inputScheduleToSheet(ir,t, h)
 }
