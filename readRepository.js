@@ -1,3 +1,39 @@
+function extractStanbyTasks(hash, scheduleBuf) {
+  const stanbyTasks = backlogHashFilter("stanby", true, hash);
+
+  // stanbyTasksの中でカレンダーに追加されていないものだけを返却
+  const tasksToAdd = stanbyTasks.filter(task => {
+    // タスクの名前がカレンダーの予定のタイトルに含まれていないかどうかをチェック
+    return !scheduleBuf.some(event => event.title.includes(task.name));
+  });
+  return tasksToAdd;
+}
+
+
+function getTodaySchedule() {
+
+  // カレンダーのイベントの期間を指定
+  const timeZero = " 00:00:00";
+  const startDate = sp.getName();
+  const startTime = new Date(startDate + timeZero);
+  const endTime = new Date(startTime.getTime() + (24 * 60 * 60 * 1000));
+  const events = calendar.getEvents(startTime, endTime);
+
+
+  // イベント情報とGoogle Calendar APIのイベントオブジェクトを含むハッシュ形式で返す
+  return events.map(event => {
+    return {
+      title: event.getTitle(),
+      startTime: event.getStartTime(),
+      endTime: event.getEndTime(),
+      rawEvent: event // Google Calendar API のイベントオブジェクト
+    };
+  });
+}
+
+
+
+
 function backlogHashFilter(attr, value, tasks) {
   // 指定された属性が連想配列の要素のキーに含まれているかチェック
   if (tasks.length > 0 && !(attr in tasks[0])) {
@@ -48,7 +84,8 @@ function getBackLogTaskRangeBuf () {
   Logger.log("baclogArea==" + "開始行" + startColumn + ", 開始列" + 2 + "行数" + startColumn + "列数" + (completeColumn - 1));
   const range = [startColumn + 1, 2, endColumn - startColumn, completeColumn - 1]
   const buf = shD.getRange(range[0], range[1], range[2], range[3]).getValues();
-  return {buf: buf,range: range}
+  const hash = serializeBacklogBufToHash(buf)
+  return {hash: hash,range: range}
 }
 
 
