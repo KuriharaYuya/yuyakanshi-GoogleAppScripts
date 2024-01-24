@@ -52,18 +52,12 @@ function inputScheduleToSheet(r, tasks, backlogTaskHash) {
   const sheet = r.getSheet();
   const startRow = r.getRow();
 
-  Logger.log("tasks")
-  Logger.log(tasks)
-  Logger.log("backlogTaskHash")
-  Logger.log(backlogTaskHash)
-
   tasks.forEach((task, index) => {
     const row = startRow + index;
     let doneValue = "FALSE";
 
     // backlogTaskHash配列をループして対応するタスクを探す
     for (const taskInHash of backlogTaskHash) {
-      Logger.log(taskInHash)
       if (taskInHash.name === task.name && taskInHash.done === "TRUE") {
         doneValue = "TRUE";
         break;
@@ -92,12 +86,12 @@ function extractTasksFromSchedule(scheduleBuf) {
     // イベントの開始時刻と終了時刻を取得
     const startTime = event.startTime;
     const endTime = event.endTime;
+    const duration = (endTime - startTime) / (60 * 1000); // 所要時間を分で計算
 
     if (matches) {
       const priority = matches[1]; // 優先度は1文字
       const asp = parseInt(matches[2], 10);
       const name = matches[3];
-      const duration = (endTime - startTime) / (60 * 1000); // 所要時間を分で計算
 
       return {
         priority: priority,
@@ -111,9 +105,9 @@ function extractTasksFromSchedule(scheduleBuf) {
       // 正規表現に合致しない場合の処理
       return {
         priority: "予定", // 優先度を "予定" とする
-        asp: "",          // ASPは空欄
+        asp: duration,          // ASPは空欄
         name: eventName,  // イベント名をそのまま使用
-        duration: "",     // 所要時間は空欄
+        duration: duration,     // 所要時間は空欄
         startTime: formatTime(startTime),
         endTime: formatTime(endTime)
       };
