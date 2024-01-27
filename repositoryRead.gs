@@ -66,8 +66,11 @@ function getBackLogTaskRangeBuf () {
   Logger.log("backlogArea==" + "開始行: " + range[0] + ", 開始列: " + range[1] + ", 行数: " + range[2] + ", 列数: " + range[3]);
   const buf = shD.getRange(range[0], range[1], range[2], range[3]).getValues();
 
-  const hash = serializeBacklogBufToHash(buf)
-  return {hash: hash,range: range}
+  const obj = serializeBacklogBufToHash(buf)
+  const { hash, emptyTaskIds } = obj;
+
+
+  return { hash, range, emptyTaskIds };
 }
 
 

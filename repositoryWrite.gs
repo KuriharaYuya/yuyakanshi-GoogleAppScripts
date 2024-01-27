@@ -18,8 +18,8 @@ function backlogHashFilter(attr, value, tasks) {
 }
 
 function serializeBacklogBufToHash(buf) {
-  // 結果を格納するための配列
-  let tasks = [];
+  let tasks = [];           // タスクを格納する配列
+  let emptyTaskIds = [];      // 空白のタスクIDを格納する配列
   const s = 1; // ステータスの列インデックス
   const t = 2; // 時間割の列のインデックス
   const p = 3; // 優先度の列インデックス
@@ -27,15 +27,15 @@ function serializeBacklogBufToHash(buf) {
   const a = 8; // ASPの列インデックス
   const c = 9; // 所要時間の列インデックス
   const d = 10; // 完了の列のインデックス
-  let doneValue
-  
+  let doneValue;
+
   // bufの各行をループして連想配列に変換
   for (let i = 0; i < buf.length; i++) {
     let row = buf[i];
     let aspValue = row[a];
     doneValue = row[d] ? "TRUE" : "FALSE";
     let task = {
-      "id": i+ 1, // backlogにおいて上から何個目のタスクなのか
+      "id": i + 1, // backlogにおいて上から何個目のタスクなのか
       "stanby": row[s] || false,
       "timeBlock": row[t],
       "priority": row[p],             // 優先度
@@ -46,10 +46,12 @@ function serializeBacklogBufToHash(buf) {
     };
     if (task.name !== "") {
       tasks.push(task);
+    } else {
+      emptyTaskIds.push(task.id); // タスク名が空の場合はIDをemptyTaskIdsに追加
     }
   }
 
   Logger.log("serializeBacklogBufToHash");
-  Logger.log(tasks);
-  return tasks;
+  Logger.log({tasks: tasks, emptyarea: emptyTaskIds});
+  return {hash: tasks, emptyTaskIds}; // 結果としてオブジェクトを返す
 }

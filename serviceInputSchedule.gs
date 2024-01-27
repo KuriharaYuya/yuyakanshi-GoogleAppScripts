@@ -84,7 +84,13 @@ function inputScheduleToSheet(r, tasks, backlogTaskHash) {
 
 
 
-function extractTasksFromSchedule(scheduleBuf) {
+
+function extractTasksFromSchedule(scheduleBuf, existingTasks) {
+  // existingTasksがnullまたはundefinedの場合、空のセットを作成
+  const existingNames = existingTasks 
+    ? new Set(existingTasks.map(task => task.name))
+    : new Set();
+
   const extractedTasks = scheduleBuf.map(event => {
     const eventName = event.title;
     const matches = eventName.match(/^#(\w)(\d+):(.+)$/);
@@ -100,6 +106,11 @@ function extractTasksFromSchedule(scheduleBuf) {
       const asp = parseInt(matches[2], 10);
       const name = matches[3];
 
+      // 既に存在するタスク名の場合はスキップ
+      if (existingNames.has(name)) {
+        return null;
+      }
+
       return {
         priority: priority,
         asp: asp,
@@ -110,6 +121,11 @@ function extractTasksFromSchedule(scheduleBuf) {
       };
     } else {
       // task
+      // 既に存在するタスク名の場合はスキップ
+      if (existingNames.has(eventName)) {
+        return null;
+      }
+
       return {
         priority: "予定", // 優先度を "予定" とする
         asp: duration,          // ASPは空欄
@@ -119,7 +135,66 @@ function extractTasksFromSchedule(scheduleBuf) {
         endTime: formatTime(endTime)
       };
     }
-  });
+  }).filter(task => task !== null); // nullをフィルタリング
 
   return extractedTasks;
+}
+
+
+
+function getEmptyAreaInBacklog(backlogRange, emptyTaskIds) {
+  // brの形式: [開始行, 開始列, 行数, 列数]
+  // etは空のタスクIDの配列
+
+  // brを使ってbacklogの全範囲を決定
+  const startRow = backlogRange[0];
+  const rowCount = backlogRange[2];
+
+  // 空いている行のリストを作成
+  let emptyRows = [];
+
+  // etに含まれる各タスクIDについて、その行がbacklog範囲内で空いているかを確認
+  for (let taskId of emptyTaskIds) {
+    let taskRow = startRow + taskId - 1; // タスクIDを行数に変換
+    if (taskRow >= startRow && taskRow < startRow + rowCount) {
+      emptyRows.push(taskRow);
+    }
+  }
+
+  // 配列の最後の要素を取り除く
+  if (emptyRows.length > 0) {
+    emptyRows.pop();
+  }
+
+  // 空いている行のリストを返す
+  return emptyRows;
+}
+
+function inputAppointToBacklog(eaColumns, at) {
+  // eaColumnsは空いているバックログの行番号の配列
+  // atはバックログのハッシュフィルタを通過したタスクの配列
+
+  // D列から順に time-block, priority, Name, 予想所要時間, A:所要時間をセットする
+  const timeBlockColumn = 4;  // D列
+  const priorityColumn = 5;   // E列
+  const nameColumn = 6;       // F列
+  const aspColumn = 11;  // J列
+
+  // 空いているバックログの行にタスクをセットする
+  for (let i = 0; i < eaColumns.length; i++) {
+    if (i < at.length) {
+      const row = eaColumns[i];  // 空いている行
+      const task = at[i];  // セットするタスク
+
+      Logger.log(task)
+
+      // 各列にタスクの情報をセット
+      shD.getRange(row, timeBlockColumn).setValue("未設定"); // time-block
+      shD.getRange(row, priorityColumn).setValue(task.priority);   // priority
+      shD.getRange(row, nameColumn).setValue(task.name);           // Name
+      shD.getRange(row, aspColumn).setValue(task.asp); // 予想所要時間
+
+      // 他の必要な情報があればここに追加
+    }
+  }
 }
