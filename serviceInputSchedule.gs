@@ -178,7 +178,7 @@ function inputAppointToBacklog(eaColumns, at) {
   const timeBlockColumn = 4;  // D列
   const priorityColumn = 5;   // E列
   const nameColumn = 6;       // F列
-  const aspColumn = 11;  // J列
+  const aspColumn = 10;  // J列
 
   // 空いているバックログの行にタスクをセットする
   for (let i = 0; i < eaColumns.length; i++) {
