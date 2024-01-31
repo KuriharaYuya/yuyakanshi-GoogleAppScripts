@@ -87,6 +87,7 @@ function inputScheduleToSheet(r, tasks, backlogTaskHash) {
 
 function extractTasksFromSchedule(scheduleBuf, existingTasks) {
   // existingTasksがnullまたはundefinedの場合、空のセットを作成
+  Logger.log(scheduleBuf)
   const existingNames = existingTasks 
     ? new Set(existingTasks.map(task => task.name))
     : new Set();
@@ -98,7 +99,8 @@ function extractTasksFromSchedule(scheduleBuf, existingTasks) {
     // イベントの開始時刻と終了時刻を取得
     const startTime = event.startTime;
     const endTime = event.endTime;
-    const duration = (endTime - startTime) / (60 * 1000); // 所要時間を分で計算
+    const duration = calculateTimeDifference(startTime, endTime)
+    
 
     if (matches) {
       // appointment
@@ -116,8 +118,8 @@ function extractTasksFromSchedule(scheduleBuf, existingTasks) {
         asp: asp,
         name: name,
         duration: duration,
-        startTime: formatTime(startTime),
-        endTime: formatTime(endTime)
+        startTime: startTime,
+        endTime: endTime,
       };
     } else {
       // task
@@ -131,8 +133,8 @@ function extractTasksFromSchedule(scheduleBuf, existingTasks) {
         asp: duration,          // ASPは空欄
         name: eventName,  // イベント名をそのまま使用
         duration: duration,     // 所要時間はカレンダーを反映させる
-        startTime: formatTime(startTime),
-        endTime: formatTime(endTime)
+        startTime: startTime,
+        endTime: endTime,
       };
     }
   }).filter(task => task !== null); // nullをフィルタリング

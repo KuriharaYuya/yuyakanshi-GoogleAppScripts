@@ -1,22 +1,22 @@
 
 
 
-function getTodaySchedule() {
-
+function getTodaySchedule(calenderApp) {
+  const calender = calenderApp
   // カレンダーのイベントの期間を指定
   const timeZero = " 00:00:00";
-  const startDate = sp.getName();
+  const startDate = getDateBySheetName();
   const startTime = new Date(startDate + timeZero);
   const endTime = new Date(startTime.getTime() + (24 * 60 * 60 * 1000));
-  const events = calendar.getEvents(startTime, endTime);
+  const events = calender.getEvents(startTime, endTime);
 
 
   // イベント情報とGoogle Calendar APIのイベントオブジェクトを含むハッシュ形式で返す
   return events.map(event => {
     return {
       title: event.getTitle(),
-      startTime: event.getStartTime(),
-      endTime: event.getEndTime(),
+      startTime: formatTime(event.getStartTime()),
+      endTime: formatTime(event.getEndTime()),
       rawEvent: event // Google Calendar API のイベントオブジェクト
     };
   });
@@ -199,8 +199,8 @@ function callender() {
     const tgtCel = i + firstTaskCellIndex;
 
     sh1.getRange('c' + tgtCel).setValue(event[i - 1].getTitle());          // イベントタイトル
-    sh1.getRange('g' + tgtCel).setValue(formatTime(eventStartTime));      // イベント開始時刻
-    sh1.getRange('h' + tgtCel).setValue(formatTime(eventEndTime));        // イベント終了時刻
+    sh1.getRange('g' + tgtCel).setValue(eventStartTime);      // イベント開始時刻
+    sh1.getRange('h' + tgtCel).setValue(eventEndTime);        // イベント終了時刻
 
     const durationInMinutes = Math.round((eventEndTime - eventStartTime) / (60 * 1000));
     console.log(durationInMinutes)
@@ -248,8 +248,8 @@ function calenderResult () {
     const tgtCel = i + firstTaskCellIndex;
 
     sh1.getRange('j' + tgtCel).setValue(event[i - 1].getTitle());          // イベントタイトル
-    sh1.getRange('p' + tgtCel).setValue(formatTime(eventStartTime));      // イベント開始時刻
-    sh1.getRange('q' + tgtCel).setValue(formatTime(eventEndTime));        // イベント終了時刻
+    sh1.getRange('p' + tgtCel).setValue(eventStartTime);      // イベント開始時刻
+    sh1.getRange('q' + tgtCel).setValue(eventEndTime);        // イベント終了時刻
 
     const durationInMinutes = Math.round((eventEndTime - eventStartTime) / (60 * 1000));
     console.log(durationInMinutes)

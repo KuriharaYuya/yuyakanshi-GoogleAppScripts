@@ -3,7 +3,7 @@ function loadBacklogAndCal() {
   const task = getBackLogTaskRangeBuf(); // return {hash: hash,range: range}
 
   // カレンダーを読み込んでbufに
-  const scheduleBuf = getTodaySchedule();
+  const scheduleBuf = getTodaySchedule(poni3Calendar);
 
   // task と scheduleBuf をオブジェクトとして返す
   return { task, scheduleBuf };

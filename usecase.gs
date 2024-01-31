@@ -37,17 +37,25 @@ function removeUnStanbyTaskToCal () {
 function inputScheduleToBacklog () {
     const contents = loadBacklogAndCal()
     const h = contents.task.hash
+    const sb = contents.scheduleBuf
     const br = contents.task.range
-    const sb = contents.scheduleBuf  
     const et = contents.task.emptyTaskIds
+
+    // poni3以外のカレンダーからも取得する
+    const jsb = getJizaieSchedule()
+
+    const convinedSb = sb.concat(jsb)
+    
 
   // backlogのタスクを取得する関数の戻り値に、空いてる行数を数字で配列で返却させる
 
   const eaColumns = getEmptyAreaInBacklog(br,et)
 
   // scheduleBufから、backlogに存在しないものを特定する
-  const st = extractTasksFromSchedule(sb,h)
+  const st = extractTasksFromSchedule(convinedSb,h)
   const at = backlogHashFilter("priority","予定", st)
+
+  
 
   // そしたらこれを空いてるeaColumnsに上から順にsetvalueしていく
   inputAppointToBacklog(eaColumns,at)
@@ -63,4 +71,10 @@ function inputCalenderResultsToSheet () {
   
   const st = extractTasksFromSchedule(sb,null)
   inputScheduleToSheet(ir,st, h)
+}
+
+
+function test () {
+  const r = alpToNum().a
+  Logger.log(r)
 }
